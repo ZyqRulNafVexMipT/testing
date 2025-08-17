@@ -1,5 +1,7 @@
 local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/1nig1htmare1234/SCRIPTS/main/Orion.lua'))()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 local Window = OrionLib:MakeWindow({
     Name = "VORTX HUB V0.0.1",
@@ -27,7 +29,7 @@ local function fireServerAsync(func, ...)
 end
 
 -- Auto Open
-local AutoOpenToggle = MainTab:MakeToggle({
+MainTab:MakeToggle({
     Name = "Auto Open",
     Default = false,
     Callback = function(state)
@@ -41,10 +43,10 @@ local AutoOpenToggle = MainTab:MakeToggle({
 })
 
 -- Infinite Money
-local InfiniteMoneyButton = MainTab:MakeButton({
+MainTab:MakeButton({
     Name = "Infinite Money",
     Callback = function()
-        local MoneyValue = game.Players.LocalPlayer.leaderstats.Money
+        local MoneyValue = LocalPlayer.leaderstats.Money
         MoneyValue.Value = math.huge
     end
 })
@@ -54,7 +56,7 @@ local function getCrates()
     return {"Smoothie", "Neon", "Gold", "Diamond"} -- List of crates available in the game
 end
 
-local CrateDropdown = MainTab:MakeDropdown({
+MainTab:MakeDropdown({
     Name = "Spawn Crate",
     Options = getCrates(),
     Default = {"Smoothie"},
@@ -65,22 +67,22 @@ local CrateDropdown = MainTab:MakeDropdown({
 })
 
 -- Run Faster
-local RunFasterToggle = MainTab:MakeToggle({
+MainTab:MakeToggle({
     Name = "Run Faster",
     Default = false,
     Callback = function(state)
         if state then
-            local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+            local Humanoid = LocalPlayer.Character.Humanoid
             Humanoid.WalkSpeed = 40
         else
-            local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+            local Humanoid = LocalPlayer.Character.Humanoid
             Humanoid.WalkSpeed = 16
         end
     end
 })
 
 -- Auto Collect
-local AutoCollectToggle = MainTab:MakeToggle({
+MainTab:MakeToggle({
     Name = "Auto Collect",
     Default = false,
     Callback = function(state)
@@ -94,7 +96,7 @@ local AutoCollectToggle = MainTab:MakeToggle({
 })
 
 -- Open Bank (Without GamePass)
-local OpenBankButton = MainTab:MakeButton({
+MainTab:MakeButton({
     Name = "Open Bank",
     Callback = function()
         local REClientSFX = ReplicatedStorage.Modules.Net["RE/ClientSFX"]
@@ -104,43 +106,43 @@ local OpenBankButton = MainTab:MakeButton({
 
 -- 5x Multiple Money (Without GamePass)
 local function multiplyMoney()
-    local MoneyValue = game.Players.LocalPlayer.leaderstats.Money
+    local MoneyValue = LocalPlayer.leaderstats.Money
     MoneyValue.Value = MoneyValue.Value * 5
 end
 
-local MultiplyMoneyButton = MainTab:MakeButton({
+MainTab:MakeButton({
     Name = "5x Money",
     Callback = multiplyMoney
 })
 
 -- 5x Luck (Without GamePass)
 local function increaseLuck()
-    local LuckValue = game.Players.LocalPlayer.leaderstats.Luck
+    local LuckValue = LocalPlayer.leaderstats.Luck
     LuckValue.Value = LuckValue.Value * 5
 end
 
-local IncreaseLuckButton = MainTab:MakeButton({
+MainTab:MakeButton({
     Name = "5x Luck",
     Callback = increaseLuck
 })
 
 -- High Jump
-local HighJumpToggle = MainTab:MakeToggle({
+MainTab:MakeToggle({
     Name = "High Jump",
     Default = false,
     Callback = function(state)
         if state then
-            local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+            local Humanoid = LocalPlayer.Character.Humanoid
             Humanoid.JumpPower = 100
         else
-            local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+            local Humanoid = LocalPlayer.Character.Humanoid
             Humanoid.JumpPower = 50
         end
     end
 })
 
 -- Auto Trade
-local AutoTradeToggle = MainTab:MakeToggle({
+MainTab:MakeToggle({
     Name = "Auto Trade",
     Default = false,
     Callback = function(state)
@@ -153,4 +155,105 @@ local AutoTradeToggle = MainTab:MakeToggle({
     end
 })
 
-OrionLib:Init()
+-- Additional Features
+-- Fly Function
+local function fly()
+    local Player = game.Players.LocalPlayer
+    local Mouse = Player:GetMouse()
+    local Plr = game.Players.LocalPlayer
+    local Toggles = {Fly = false}
+    local Speed = 50
+    local Keys = {a = false, d = false, w = false, s = false}
+    local function Fly()
+        if Toggles.Fly then
+            local BodyPosition = Instance.new("BodyPosition", Plr.Character.HumanoidRootPart)
+            BodyPosition.Name = "OrionFly"
+            BodyPosition.D = 100
+            BodyPosition.P = 2000
+            BodyPosition.Position = Plr.Character.HumanoidRootPart.Position
+            local BodyGyro = Instance.new("BodyGyro", Plr.Character.HumanoidRootPart)
+            BodyGyro.Name = "OrionFly"
+            BodyGyro.D = 100
+            BodyGyro.P = 2000
+            BodyGyro.maxTorque = Vector3.new(0, 9000, 0)
+            BodyGyro.cframe = Plr.Character.HumanoidRootPart.CFrame
+            task.spawn(function()
+                while Toggles.Fly do
+                    if Keys.w then
+                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position + (Plr.Character.HumanoidRootPart.CFrame.lookVector * Speed)
+                    end
+                    if Keys.s then
+                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position - (Plr.Character.HumanoidRootPart.CFrame.lookVector * Speed)
+                    end
+                    if Keys.a then
+                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position - (Plr.Character.HumanoidRootPart.CFrame.rightVector * Speed)
+                    end
+                    if Keys.d then
+                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position + (Plr.Character.HumanoidRootPart.CFrame.rightVector * Speed)
+                    end
+                    task.wait()
+                end
+            end)
+            Mouse.KeyDown:Connect(function(KeyPressed)
+                if KeyPressed == "w" then
+                    Keys.w = true
+                end
+                if KeyPressed == "s" then
+                    Keys.s = true
+                end
+                if KeyPressed == "a" then
+                    Keys.a = true
+                end
+                if KeyPressed == "d" then
+                    Keys.d = true
+                end
+            end)
+            Mouse.KeyUp:Connect(function(KeyPressed)
+                if KeyPressed == "w" then
+                    Keys.w = false
+                end
+                if KeyPressed == "s" then
+                    Keys.s = false
+                end
+                if KeyPressed == "a" then
+                    Keys.a = false
+                end
+                if KeyPressed == "d" then
+                    Keys.d = false
+                end
+            end)
+        else
+            if Plr.Character.HumanoidRootPart:FindFirstChild("OrionFly") then
+                Plr.Character.HumanoidRootPart.OrionFly:Destroy()
+            end
+        end
+    end
+    MainTab:MakeToggle({
+        Name = "Fly",
+        Default = false,
+        Callback = function(state)
+            Toggles.Fly = state
+            Fly()
+        end
+    })
+end
+
+-- Noclip Function
+local function noclip()
+    local Player = game.Players.LocalPlayer
+    local Toggles = {Noclip = false}
+    local function Noclip()
+        if Toggles.Noclip then
+            for _, v in pairs(Player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        else
+            for _, v in pairs(Player
+
+                OrionLib:Init()
