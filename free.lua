@@ -15,6 +15,7 @@ local MainTab = Window:MakeTab({
     PremiumOnly = false
 })
 
+-- Function to fire server events
 local function fireServerAsync(func, ...)
     local args = {...}
     local result = pcall(function()
@@ -50,7 +51,7 @@ local InfiniteMoneyButton = MainTab:MakeButton({
 
 -- Spawn Crate
 local function getCrates()
-    return {"Smoothie", "Neon", "Gold", "Diamond"} -- Daftar crate yang ditemukan di game
+    return {"Smoothie", "Neon", "Gold", "Diamond"} -- List of crates available in the game
 end
 
 local CrateDropdown = MainTab:MakeDropdown({
