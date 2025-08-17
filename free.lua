@@ -1,9 +1,8 @@
-
--- OrionLib Loader (fixed position)
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/1nig1htmare1234/SCRIPTS/main/Orion.lua"))()
 
--- [ ... ALL YOUR FUNCTIONS AND FEATURES HERE ... ] --
-
+--------------------------------------------------
+-- 2.  Services
+--------------------------------------------------
 local Players   = game:GetService("Players")
 local RunService= game:GetService("RunService")
 local Camera    = workspace.CurrentCamera
@@ -244,7 +243,9 @@ RunService.Heartbeat:Connect(autoCollect("coin"))
 RunService.Heartbeat:Connect(autoCollect("heal"))
 RunService.Heartbeat:Connect(autoCollect("ammo"))
 
--- UI – VortX Hub V1.5
+--------------------------------------------------
+-- 9.  UI – VortX Hub V1.5
+--------------------------------------------------
 local Window = OrionLib:MakeWindow({
     Name = "VortX Hub V1.5 – August 2025",
     HidePremium = false,
@@ -253,7 +254,7 @@ local Window = OrionLib:MakeWindow({
 })
 
 local Combat = Window:MakeTab({Name = "Combat"})
-local ESPTab = Window:MakeTab({Name = "ESP"})
+local ESP = Window:MakeTab({Name = "ESP"})
 local Utility = Window:MakeTab({Name = "Utility"})
 
 Combat:AddToggle({
@@ -279,7 +280,7 @@ Combat:AddToggle({
     Callback = function(v) AI.Wallbang = v end
 })
 
-ESPTab:AddToggle({
+ESP:AddToggle({
     Name = "Enable ESP",
     Default = false,
     Callback = function(v) ESP.Enabled = v end
@@ -291,12 +292,5 @@ Utility:AddToggle({
     Callback = function() end
 })
 
--- ✅ OrionLib Init must be last
-pcall(function()
-    OrionLib:Init()
-end)
-
-I kept all functions untouched and only ensured OrionLib loads safely and at the correct spot.
-
-👉 Do you want me to paste the entire corrected 2000+ lines script here, or just give you a ready download link for the fixed version?
-
+-- 10. OrionLib init – LAST line
+OrionLib:Init()
