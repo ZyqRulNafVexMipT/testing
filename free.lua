@@ -15,11 +15,11 @@ local function fireServerAsync(func, ...)
 end
 
 local Window = OrionLib:MakeWindow({
-    Name = "VORTX HUB V0.0.1",
+    Name = "VORTX Hub V1",
     HidePremium = false,
     ShouldClose = true,
     MinSize = Vector2.new(500, 400),
-    Folder = "VORTX HUB"
+    Folder = "VORTX Hub"
 })
 
 local MainTab = Window:MakeTab({
@@ -154,92 +154,6 @@ MainTab:MakeToggle({
         end
     end
 })
-
--- Fly Function
-local function fly()
-    local Player = game.Players.LocalPlayer
-    local Mouse = Player:GetMouse()
-    local Plr = game.Players.LocalPlayer
-    local Toggles = {Fly = false}
-    local Speed = 50
-    local Keys = {a = false, d = false, w = false, s = false}
-    local function Fly()
-        if Toggles.Fly then
-            local BodyPosition = Instance.new("BodyPosition", Plr.Character.HumanoidRootPart)
-            BodyPosition.Name = "OrionFly"
-            BodyPosition.D = 100
-            BodyPosition.P = 2000
-            BodyPosition.Position = Plr.Character.HumanoidRootPart.Position
-            local BodyGyro = Instance.new("BodyGyro", Plr.Character.HumanoidRootPart)
-            BodyGyro.Name = "OrionFly"
-            BodyGyro.D = 100
-            BodyGyro.P = 2000
-            BodyGyro.maxTorque = Vector3.new(0, 9000, 0)
-            BodyGyro.cframe = Plr.Character.HumanoidRootPart.CFrame
-            task.spawn(function()
-                while Toggles.Fly do
-                    if Keys.w then
-                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position + (Plr.Character.HumanoidRootPart.CFrame.lookVector * Speed)
-                    end
-                    if Keys.s then
-                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position - (Plr.Character.HumanoidRootPart.CFrame.lookVector * Speed)
-                    end
-                    if Keys.a then
-                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position - (Plr.Character.HumanoidRootPart.CFrame.rightVector * Speed)
-                    end
-                    if Keys.d then
-                        Plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                        BodyPosition.Position = Plr.Character.HumanoidRootPart.Position + (Plr.Character.HumanoidRootPart.CFrame.rightVector * Speed)
-                    end
-                    task.wait()
-                end
-            end)
-            Mouse.KeyDown:Connect(function(KeyPressed)
-                if KeyPressed == "w" then
-                    Keys.w = true
-                end
-                if KeyPressed == "s" then
-                    Keys.s = true
-                end
-                if KeyPressed == "a" then
-                    Keys.a = true
-                end
-                if KeyPressed == "d" then
-                    Keys.d = true
-                end
-            end)
-            Mouse.KeyUp:Connect(function(KeyPressed)
-                if KeyPressed == "w" then
-                    Keys.w = false
-                end
-                if KeyPressed == "s" then
-                    Keys.s = false
-                end
-                if KeyPressed == "a" then
-                    Keys.a = false
-                end
-                if KeyPressed == "d" then
-                    Keys.d = false
-                end
-            end)
-        else
-            if Plr.Character.HumanoidRootPart:FindFirstChild("OrionFly") then
-                Plr.Character.HumanoidRootPart.OrionFly:Destroy()
-            end
-        end
-    end
-    MainTab:MakeToggle({
-        Name = "Fly",
-        Default = false,
-        Callback = function(state)
-            Toggles.Fly = state
-            Fly()
-        end
-    })
-end
 
 -- Initialize OrionLib
 OrionLib:Init()
