@@ -3,6 +3,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- Function to fire server events
+local function fireServerAsync(func, ...)
+    local args = {...}
+    local result = pcall(function()
+        return func:InvokeServer(unpack(args))
+    end)
+    if not result then
+        warn("Error firing RemoteEvent:", ...)
+    end
+end
+
 local Window = OrionLib:MakeWindow({
     Name = "VORTX HUB V0.0.1",
     HidePremium = false,
@@ -16,17 +27,6 @@ local MainTab = Window:MakeTab({
     Icon = "rbxassetid://4483362458",
     PremiumOnly = false
 })
-
--- Function to fire server events
-local function fireServerAsync(func, ...)
-    local args = {...}
-    local result = pcall(function()
-        return func:InvokeServer(unpack(args))
-    end)
-    if not result then
-        warn("Error firing RemoteEvent:", ...)
-    end
-end
 
 -- Auto Open
 MainTab:MakeToggle({
@@ -155,7 +155,6 @@ MainTab:MakeToggle({
     end
 })
 
--- Additional Features
 -- Fly Function
 local function fly()
     local Player = game.Players.LocalPlayer
@@ -242,16 +241,5 @@ local function fly()
     })
 end
 
--- Noclip Function
-local function noclip()
-    local Player = game.Players.LocalPlayer
-    local Toggles = {Noclip = false}
-    local function Noclip()
-        if Toggles.Noclip then
-            for _, v in pairs(Player.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                end
-            end
-        else
-            for _, v in
+-- Initialize OrionLib
+OrionLib:Init()
