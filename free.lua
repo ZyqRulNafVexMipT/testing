@@ -254,6 +254,4 @@ local function noclip()
                 end
             end
         else
-            for _, v in pairs(Player
-
-                OrionLib:Init()
+            for _, v in
