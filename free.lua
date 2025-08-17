@@ -1,122 +1,80 @@
---[[
-    VORTX HUB – FULL OVERHAUL 2025  
-    • OrionLib UI – one file, paste & run  
-    • AI-powered anti-cheat bypass (100 % undetect)  
-    • Ultra-smooth, gacor aimbot + silent-aim + prediction  
-    • NEW Hypershot gun-mod engine (no recoil, no spread, instant reload)  
-    • Auto-chat bypasser (prevents logs & reports)  
-    • All previous features kept (ESP, auto-chest, auto-spin, etc.)  
-    • Completely in English
-]]
-
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 1.  Load OrionLib                                           │
--- └──────────────────────────────────────────────────────────────┘
+--[[  VORTX HUB – ONE FILE  ]]
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/1nig1htmare1234/SCRIPTS/main/Orion.lua"))()
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 2.  Services & constants                                    │
--- └──────────────────────────────────────────────────────────────┘
-local HttpService      = game:GetService("HttpService")
-local UserInputService = game:GetService("UserInputService")
-local RunService       = game:GetService("RunService")
-local Workspace        = game:GetService("Workspace")
-local Players          = game:GetService("Players")
-local ReplicatedStorage= game:GetService("ReplicatedStorage")
-local TweenService     = game:GetService("TweenService")
+local HS = game:GetService("HttpService")
+local UIS = game:GetService("UserInputService")
+local RS  = game:GetService("RunService")
+local WS  = game:GetService("Workspace")
+local PS  = game:GetService("Players")
+local RS2 = game:GetService("ReplicatedStorage")
 
-local LocalPlayer      = Players.LocalPlayer
-local Camera           = Workspace.CurrentCamera
-local MobsFolder       = Workspace:FindFirstChild("Mobs")
+local LP = PS.LocalPlayer
+local Cam = WS.CurrentCamera
+local MobsFolder = WS:FindFirstChild("Mobs")
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 3.  Anti-cheat bypass engine (AI-powered)                   │
--- └──────────────────────────────────────────────────────────────┘
--- 3.1  Hide remote events from reflection
-local function cloakRemote(remote)
-    if not remote then return end
-    pcall(function()
-        sethiddenproperty(remote, "Name", "")
-        sethiddenproperty(remote, "Archivable", false)
-    end)
-end
-
--- 3.2  Anti-log & anti-report
-local function blockChatLog()
-    local chatModules = {
-        "ChatServiceRunner",
-        "ChatService",
-        "ChatModule",
-        "MessageCreatorModules"
-    }
-    for _, m in ipairs(chatModules) do
-        local mod = game:FindFirstChild(m, true)
-        if mod then
-            pcall(function() mod:Destroy() end)
-        end
-    end
-end
-
--- 3.3  Spoof mouse & key presses
-local oldMouse = mousemoverel
-local oldKey   = keypress
-local function spoofInput()
-    mousemoverel = function(...) end
-    keypress     = function(...) end
-end
-
--- 3.4  Execute bypass
-blockChatLog()
-spoofInput()
-cloakRemote(ReplicatedStorage:FindFirstChild("Network"))
-
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 4.  Config save / load                                      │
--- └──────────────────────────────────────────────────────────────┘
+-- ┌─────────────────────────────────────────────┐
+-- │ 1. CONFIG SAVE / LOAD                       │
+-- └─────────────────────────────────────────────┘
 local SaveFolder = "VortXHub"
 local SaveFile   = SaveFolder .. "/vortx_config.json"
 if not isfolder(SaveFolder) then makefolder(SaveFolder) end
 
 local Config = {
-    AICoreEnabled      = false,
-    AICoreFOV          = 120,
-    BigHeadEnabled     = false,
-    AutoFireEnabled    = false,
-    ESPChams           = false,
-    ESPOnly            = false,
-    HeadLock           = false,
-    RapidFire          = false,
-    AntiCheatBypass    = true,
-    AutoSpawn          = false,
-    AutoPlaytime       = false,
-    AutoPickUpHeal     = false,
-    AutoPickUpAmmo     = false,
-    AutoPickUpCoins    = false,
-    AutoPickUpWeapons  = false,
-    AutoOpenChest      = false,
-    AutoSpin           = false,
-    SelectedChest      = "Wooden",
-    SelectedWeaponName = "All"
+    AntiCheatBypass = true,
+    AICoreEnabled   = false,
+    AICoreFOV       = 120,
+    BigHeadEnabled  = false,
+    AutoFireEnabled = false,
+    HypershotMod    = false,
+    ESPChams        = false,
+    ESPOnly         = false,
+    HeadLock        = false,
+    RapidFire       = false,
+    AutoSpawn       = false,
+    AutoPlaytime    = false,
+    AutoPickUpHeal  = false,
+    AutoPickUpAmmo  = false,
+    AutoPickUpCoins = false,
+    AutoPickUpWeapons = false,
+    AutoOpenChest   = false,
+    AutoSpin        = false,
+    SelectedChest   = "Wooden",
+    SelectedWeapon  = "All"
 }
 
 local function loadCfg()
-    local ok, data = pcall(function()
-        return HttpService:JSONDecode(readfile(SaveFile))
-    end)
+    local ok, data = pcall(function() return HS:JSONDecode(readfile(SaveFile)) end)
     if ok and type(data) == "table" then
         for k, v in pairs(data) do Config[k] = v end
     end
 end
 
 local function saveCfg()
-    writefile(SaveFile, HttpService:JSONEncode(Config))
+    writefile(SaveFile, HS:JSONEncode(Config))
 end
-loadCfg()
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 5.  Hypershot gun-mod engine (credits <@1150254098776592494>)│
--- └──────────────────────────────────────────────────────────────┘
-local function applyGunMods()
+loadCfg() -- load first
+-- ┌─────────────────────────────────────────────┐
+-- │ 2. ANTI-CHEAT BYPASS                        │
+-- └─────────────────────────────────────────────┘
+if Config.AntiCheatBypass then
+    -- chat log block
+    for _, v in pairs(game:GetDescendants()) do
+        if v.Name:lower():find("chat") then
+            pcall(function() v:Destroy() end)
+        end
+    end
+    -- remote cloaking
+    local remote = RS2:FindFirstChild("Network", true)
+    if remote then
+        pcall(function() sethiddenproperty(remote, "Name", "") end)
+    end
+end
+
+-- ┌─────────────────────────────────────────────┐
+-- │ 3. HYPERSHOT GUN MODS                       │
+-- └─────────────────────────────────────────────┘
+local function applyHypershot()
     for _, v in next, getgc(true) do
         if typeof(v) == "table" and rawget(v, "Spread") then
             rawset(v, "Spread", 0)
@@ -128,113 +86,100 @@ local function applyGunMods()
             rawset(v, "MinTransRecoil", Vector3.new())
             rawset(v, "MaxTransRecoil", Vector3.new())
             rawset(v, "ScopeSpeed", 100)
-            rawset(v, "ReloadTime", 0)   -- instant reload
-            print("Hypershot mods applied")
+            rawset(v, "ReloadTime", 0)
         end
     end
 end
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 6.  Ultra-Gacor AI aimbot                                   │
--- └──────────────────────────────────────────────────────────────┘
+-- ┌─────────────────────────────────────────────┐
+-- │ 4. AI ENGINE                                │
+-- └─────────────────────────────────────────────┘
 local AICore = {
     enabled   = Config.AICoreEnabled,
     fov       = Config.AICoreFOV,
-    target    = nil,
     smoothing = 0.08,
     prediction = 0.045,
     lockPart  = "Head",
     teamCheck = true,
-    visibleOnly = true,
-    silentAim = false
+    visibleOnly = true
 }
-
 local AimbotCircle = Drawing.new("Circle")
 AimbotCircle.Visible = false
 AimbotCircle.Thickness = 2
 AimbotCircle.Radius = AICore.fov
-AimbotCircle.Color = Color3.fromRGB(0, 255, 255)
+AimbotCircle.Color = Color3.fromRGB(0,255,255)
 AimbotCircle.Transparency = 0.5
-AimbotCircle.Position = Camera.ViewportSize / 2
 
 local function isVisible(part)
-    local origin = Camera.CFrame.Position
+    local origin = Cam.CFrame.Position
     local dir    = (part.Position - origin).Unit
     local ray    = Ray.new(origin, dir * 500)
-    local hit, _ = Workspace:FindPartOnRay(ray, LocalPlayer.Character)
+    local hit, _ = WS:FindPartOnRay(ray, LP.Character)
     return hit and hit:IsDescendantOf(part.Parent)
 end
 
-local function getClosestPlayer()
-    local mousePos = UserInputService:GetMouseLocation()
+local function getClosest()
+    local mousePos = UIS:GetMouseLocation()
     local closest, distMin = nil, math.huge
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr == LocalPlayer then continue end
+    for _, plr in pairs(PS:GetPlayers()) do
+        if plr == LP then continue end
         local char = plr.Character
         if not char or not char:FindFirstChild(AICore.lockPart) then continue end
         local hum = char:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then continue end
         local part = char[AICore.lockPart]
-        local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+        local screenPos, onScreen = Cam:WorldToViewportPoint(part.Position)
         if not onScreen then continue end
         local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
         if dist > AICore.fov then continue end
-        if AICore.teamCheck and plr.Team == LocalPlayer.Team then continue end
+        if AICore.teamCheck and plr.Team == LP.Team then continue end
         if AICore.visibleOnly and not isVisible(part) then continue end
-        if dist < distMin then
-            distMin = dist
-            closest = plr
-        end
+        if dist < distMin then distMin = dist; closest = plr end
     end
     return closest
 end
 
 local function aimAtTarget()
-    if not AICore.target then return end
-    local part = AICore.target.Character[AICore.lockPart]
+    local target = getClosest()
+    if not target then return end
+    local part = target.Character[AICore.lockPart]
     local targetPos = part.Position + part.Velocity * AICore.prediction
-    local camPos = Camera.CFrame.Position
+    local camPos = Cam.CFrame.Position
     local newCf = CFrame.new(camPos, targetPos)
-    Camera.CFrame = Camera.CFrame:Lerp(newCf, AICore.smoothing)
+    Cam.CFrame = Cam.CFrame:Lerp(newCf, AICore.smoothing)
 end
 
 local function enableAimbot()
     AICore.enabled = true
     AimbotCircle.Visible = true
-    RunService:BindToRenderStep("VortX_Aimbot", 200, function()
+    RS:BindToRenderStep("VortX_Aimbot", 200, function()
         if not AICore.enabled then return end
         AimbotCircle.Radius = AICore.fov
-        AimbotCircle.Position = UserInputService:GetMouseLocation()
-        AICore.target = getClosestPlayer()
-        if AICore.target then
-            aimAtTarget()
-            if AICore.silentAim then
-                mouse1click()
-            end
-        end
+        AimbotCircle.Position = UIS:GetMouseLocation()
+        aimAtTarget()
     end)
 end
 
 local function disableAimbot()
     AICore.enabled = false
     AimbotCircle.Visible = false
-    RunService:UnbindFromRenderStep("VortX_Aimbot")
+    RS:UnbindFromRenderStep("VortX_Aimbot")
 end
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 7.  Big-head & auto-fire                                    │
--- └──────────────────────────────────────────────────────────────┘
+-- ┌─────────────────────────────────────────────┐
+-- │ 5. BIG HEAD & AUTO FIRE                     │
+-- └─────────────────────────────────────────────┘
 local bigHeadConn
 local function enableBigHead()
     if bigHeadConn then bigHeadConn:Disconnect() end
-    bigHeadConn = RunService.RenderStepped:Connect(function()
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr == LocalPlayer then continue end
+    bigHeadConn = RS.RenderStepped:Connect(function()
+        for _, plr in pairs(PS:GetPlayers()) do
+            if plr == LP then continue end
             local char = plr.Character
-            if not char or not char:FindFirstChild("Head") then continue end
-            local head = char.Head
-            head.Size = Vector3.new(6, 6, 6)
-            head.Transparency = 0.4
+            if char and char:FindFirstChild("Head") then
+                char.Head.Size = Vector3.new(6, 6, 6)
+                char.Head.Transparency = 0.4
+            end
         end
     end)
 end
@@ -246,10 +191,8 @@ end
 local autoFireConn
 local function enableAutoFire()
     if autoFireConn then autoFireConn:Disconnect() end
-    autoFireConn = RunService.RenderStepped:Connect(function()
-        if getClosestPlayer() then
-            mouse1click()
-        end
+    autoFireConn = RS.RenderStepped:Connect(function()
+        if getClosest() then mouse1click() end
     end)
 end
 
@@ -257,48 +200,107 @@ local function disableAutoFire()
     if autoFireConn then autoFireConn:Disconnect(); autoFireConn = nil end
 end
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 8.  Auto features (fully preserved)                         │
--- └──────────────────────────────────────────────────────────────┘
-local autoSpawnLoop      = false
-local autoPlaytimeLoop   = false
-local autoPickUpHealLoop = false
-local autoPickUpAmmoLoop = false
-local autoPickUpCoinsLoop= false
-local autoPickUpWeaponsLoop=false
-local autoOpenChestLoop  = false
-local autoSpinLoop       = false
+-- ┌─────────────────────────────────────────────┐
+-- │ 6. AUTO FEATURES (short loops)              │
+-- └─────────────────────────────────────────────┘
+local loops = {}
+local function startLoop(name, delay, func)
+    if loops[name] then loops[name]:Disconnect() end
+    loops[name] = RS.RenderStepped:Connect(func)
+end
+local function stopLoop(name)
+    if loops[name] then loops[name]:Disconnect(); loops[name]=nil end
+end
 
+-- spawn
 local function startAutoSpawn()
-    autoSpawnLoop = true
-    task.spawn(function()
-        while autoSpawnLoop do
-            ReplicatedStorage:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("Spawn"):FireServer(false)
-            task.wait(1.5)
-        end
+    startLoop("AutoSpawn", 1.5, function()
+        RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("Spawn"):FireServer(false)
     end)
 end
-local function stopAutoSpawn() autoSpawnLoop = false end
+local function stopAutoSpawn() stopLoop("AutoSpawn") end
 
+-- playtime
 local function startAutoPlaytime()
-    autoPlaytimeLoop = true
-    task.spawn(function()
-        while autoPlaytimeLoop do
-            for i = 1, 12 do
-                ReplicatedStorage:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("ClaimPlaytimeReward"):FireServer(i)
-                task.wait(1)
-            end
-            task.wait(15)
+    startLoop("AutoPlaytime", 16, function()
+        for i = 1, 12 do
+            RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("ClaimPlaytimeReward"):FireServer(i)
+            wait(1)
         end
     end)
 end
-local function stopAutoPlaytime() autoPlaytimeLoop = false end
+local function stopAutoPlaytime() stopLoop("AutoPlaytime") end
 
--- … (other loops shortened – identical to previous full file)
+-- heal
+local function startAutoPickUpHeal()
+    startLoop("AutoHeal", 0.3, function()
+        local folder = WS:WaitForChild("IgnoreThese"):WaitForChild("Pickups"):WaitForChild("Heals")
+        for _, h in ipairs(folder:GetChildren()) do
+            RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("PickUpHeal"):FireServer(h)
+        end
+    end)
+end
+local function stopAutoPickUpHeal() stopLoop("AutoHeal") end
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 9.  OrionLib UI                                             │
--- └──────────────────────────────────────────────────────────────┘
+-- ammo
+local function startAutoPickUpAmmo()
+    startLoop("AutoAmmo", 0.3, function()
+        local folder = WS:WaitForChild("IgnoreThese"):WaitForChild("Pickups"):WaitForChild("Ammo")
+        for _, a in ipairs(folder:GetChildren()) do
+            RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("PickUpAmmo"):FireServer(a)
+        end
+    end)
+end
+local function stopAutoPickUpAmmo() stopLoop("AutoAmmo") end
+
+-- coins
+local function startAutoPickUpCoins()
+    startLoop("AutoCoins", 0.05, function()
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        local folder = WS:WaitForChild("IgnoreThese"):WaitForChild("Pickups"):WaitForChild("Loot")
+        for _, c in ipairs(folder:GetChildren()) do
+            if c:IsA("BasePart") and (c.Position - hrp.Position).Magnitude <= 100 then
+                c.CFrame = c.CFrame:Lerp(CFrame.new(hrp.Position + Vector3.new(0, 2, 0)), 0.5)
+            end
+        end
+    end)
+end
+local function stopAutoPickUpCoins() stopLoop("AutoCoins") end
+
+-- weapons
+local function startAutoPickUpWeapons()
+    startLoop("AutoWeapons", 0.3, function()
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        local folder = WS:WaitForChild("IgnoreThese"):WaitForChild("Pickups"):WaitForChild("Weapons")
+        for _, w in ipairs(folder:GetChildren()) do
+            w.CFrame = hrp.CFrame
+        end
+    end)
+end
+local function stopAutoPickUpWeapons() stopLoop("AutoWeapons") end
+
+-- chest
+local function startAutoOpenChest()
+    startLoop("AutoChest", 5, function()
+        local args = { Config.SelectedChest, "Random" }
+        RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("OpenCase"):InvokeServer(unpack(args))
+    end)
+end
+local function stopAutoOpenChest() stopLoop("AutoChest") end
+
+-- spin
+local function startAutoSpin()
+    startLoop("AutoSpin", 5, function()
+        RS2:WaitForChild("Network"):WaitForChild("Remotes"):WaitForChild("SpinWheel"):InvokeServer()
+    end)
+end
+local function stopAutoSpin() stopLoop("AutoSpin") end
+
+-- ┌─────────────────────────────────────────────┐
+-- │ 7. UI WITH ORIONLIB                         │
+-- └─────────────────────────────────────────────┘
 local Window = OrionLib:MakeWindow({
     Name = "VortX Hub",
     HidePremium = false,
@@ -307,32 +309,24 @@ local Window = OrionLib:MakeWindow({
 })
 
 local MainTab = Window:MakeTab({ Name = "Main", Icon = "rbxassetid://4483345998" })
-local SettingsTab = Window:MakeTab({ Name = "Settings", Icon = "rbxassetid://4483345998" })
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 10. UI sections & controls                                  │
--- └──────────────────────────────────────────────────────────────┘
 local MainSection = MainTab:AddSection({ Name = "Main Features" })
-local MiscSection = MainTab:AddSection({ Name = "Misc" })
 
 MainSection:AddToggle({
-    Name = "VortX Anti-Cheat Bypass (AI)",
+    Name = "Anti-Cheat Bypass",
     Default = Config.AntiCheatBypass,
     Save = true,
     Flag = "AntiCheatBypass",
-    Callback = function(v)
-        Config.AntiCheatBypass = v
-    end
+    Callback = function(v) Config.AntiCheatBypass = v; saveCfg() end
 })
 
 MainSection:AddToggle({
-    Name = "VortX AI Aimbot (Ultra-Gacor)",
+    Name = "Ultra-Gacor AI Aimbot",
     Default = Config.AICoreEnabled,
     Save = true,
     Flag = "AICoreEnabled",
     Callback = function(v)
-        Config.AICoreEnabled = v
-        saveCfg()
+        Config.AICoreEnabled = v; saveCfg()
         v and enableAimbot() or disableAimbot()
     end
 })
@@ -345,17 +339,18 @@ MainSection:AddSlider({
     Save = true,
     Flag = "AICoreFOV",
     Callback = function(v)
-        Config.AICoreFOV = v
-        AICore.fov = v
+        Config.AICoreFOV = v; AICore.fov = v; saveCfg()
     end
 })
 
 MainSection:AddToggle({
     Name = "Hypershot Gun Mods",
-    Default = false,
-    Save = false,
+    Default = Config.HypershotMod,
+    Save = true,
+    Flag = "HypershotMod",
     Callback = function(v)
-        if v then applyGunMods() end
+        Config.HypershotMod = v; saveCfg()
+        if v then applyHypershot() end
     end
 })
 
@@ -365,18 +360,18 @@ MainSection:AddToggle({
     Save = true,
     Flag = "BigHeadEnabled",
     Callback = function(v)
-        Config.BigHeadEnabled = v
+        Config.BigHeadEnabled = v; saveCfg()
         v and enableBigHead() or disableBigHead()
     end
 })
 
 MainSection:AddToggle({
-    Name = "Auto Fire (Silent)",
+    Name = "Silent Auto Fire",
     Default = Config.AutoFireEnabled,
     Save = true,
     Flag = "AutoFireEnabled",
     Callback = function(v)
-        Config.AutoFireEnabled = v
+        Config.AutoFireEnabled = v; saveCfg()
         v and enableAutoFire() or disableAutoFire()
     end
 })
@@ -387,7 +382,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoSpawn",
     Callback = function(v)
-        Config.AutoSpawn = v
+        Config.AutoSpawn = v; saveCfg()
         v and startAutoSpawn() or stopAutoSpawn()
     end
 })
@@ -398,7 +393,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoPlaytime",
     Callback = function(v)
-        Config.AutoPlaytime = v
+        Config.AutoPlaytime = v; saveCfg()
         v and startAutoPlaytime() or stopAutoPlaytime()
     end
 })
@@ -409,7 +404,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoPickUpHeal",
     Callback = function(v)
-        Config.AutoPickUpHeal = v
+        Config.AutoPickUpHeal = v; saveCfg()
         v and startAutoPickUpHeal() or stopAutoPickUpHeal()
     end
 })
@@ -420,7 +415,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoPickUpAmmo",
     Callback = function(v)
-        Config.AutoPickUpAmmo = v
+        Config.AutoPickUpAmmo = v; saveCfg()
         v and startAutoPickUpAmmo() or stopAutoPickUpAmmo()
     end
 })
@@ -431,7 +426,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoPickUpCoins",
     Callback = function(v)
-        Config.AutoPickUpCoins = v
+        Config.AutoPickUpCoins = v; saveCfg()
         v and startAutoPickUpCoins() or stopAutoPickUpCoins()
     end
 })
@@ -442,7 +437,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoPickUpWeapons",
     Callback = function(v)
-        Config.AutoPickUpWeapons = v
+        Config.AutoPickUpWeapons = v; saveCfg()
         v and startAutoPickUpWeapons() or stopAutoPickUpWeapons()
     end
 })
@@ -453,7 +448,7 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoOpenChest",
     Callback = function(v)
-        Config.AutoOpenChest = v
+        Config.AutoOpenChest = v; saveCfg()
         v and startAutoOpenChest() or stopAutoOpenChest()
     end
 })
@@ -465,8 +460,7 @@ MainSection:AddDropdown({
     Flag = "SelectedChest",
     Options = {"Wooden","Bronze","Silver","Gold","Diamond"},
     Callback = function(v)
-        Config.SelectedChest = v
-        saveCfg()
+        Config.SelectedChest = v; saveCfg()
     end
 })
 
@@ -476,30 +470,32 @@ MainSection:AddToggle({
     Save = true,
     Flag = "AutoSpin",
     Callback = function(v)
-        Config.AutoSpin = v
+        Config.AutoSpin = v; saveCfg()
         v and startAutoSpin() or stopAutoSpin()
     end
 })
 
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 11. Auto-load on script start                               │
--- └──────────────────────────────────────────────────────────────┘
-task.spawn(function()
-    if Config.AntiCheatBypass then blockChatLog(); spoofInput(); cloakRemote(ReplicatedStorage:FindFirstChild("Network")) end
-    if Config.AICoreEnabled         then enableAimbot() end
-    if Config.BigHeadEnabled        then enableBigHead() end
-    if Config.AutoFireEnabled       then enableAutoFire() end
-    if Config.AutoSpawn             then startAutoSpawn() end
-    if Config.AutoPlaytime          then startAutoPlaytime() end
-    if Config.AutoPickUpHeal        then startAutoPickUpHeal() end
-    if Config.AutoPickUpAmmo        then startAutoPickUpAmmo() end
-    if Config.AutoPickUpCoins       then startAutoPickUpCoins() end
-    if Config.AutoPickUpWeapons     then startAutoPickUpWeapons() end
-    if Config.AutoOpenChest         then startAutoOpenChest() end
-    if Config.AutoSpin              then startAutoSpin() end
-end)
-
--- ┌──────────────────────────────────────────────────────────────┐
--- │ 12. OrionLib Init                                           │
--- └──────────────────────────────────────────────────────────────┘
+-- ┌─────────────────────────────────────────────┐
+-- │ 8. ORIONLIB INIT (AFTER CONFIG LOADED)      │
+-- └─────────────────────────────────────────────┘
 OrionLib:Init()
+
+-- ┌─────────────────────────────────────────────┐
+-- │ 9. AUTO-LOAD TOGGLES ON START               │
+-- └─────────────────────────────────────────────┘
+task.spawn(function()
+    if Config.AntiCheatBypass then -- already applied above
+    end
+    if Config.HypershotMod then applyHypershot() end
+    if Config.AICoreEnabled then enableAimbot() end
+    if Config.BigHeadEnabled then enableBigHead() end
+    if Config.AutoFireEnabled then enableAutoFire() end
+    if Config.AutoSpawn then startAutoSpawn() end
+    if Config.AutoPlaytime then startAutoPlaytime() end
+    if Config.AutoPickUpHeal then startAutoPickUpHeal() end
+    if Config.AutoPickUpAmmo then startAutoPickUpAmmo() end
+    if Config.AutoPickUpCoins then startAutoPickUpCoins() end
+    if Config.AutoPickUpWeapons then startAutoPickUpWeapons() end
+    if Config.AutoOpenChest then startAutoOpenChest() end
+    if Config.AutoSpin then startAutoSpin() end
+end)
